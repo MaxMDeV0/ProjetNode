@@ -1,17 +1,16 @@
 const fs = require('fs');
 const path = require('path');
 
-//const cwd = process.cwd()
 
 class User {
 
-    constructor(user) {
+    constructor(user, id = User.incrementId()) {
+        
         this.name  = user.name
         this.birth = user.birth
-        this.id = User.incrementId()
-
-        
+        this.id = id
     }
+
 
     static incrementId() {
         if (!this.latestId) this.latestId = 6
@@ -19,15 +18,48 @@ class User {
         return this.latestId
     }
 
-    updateUser(){
+    static getUserFromID(id) {
+        const user = this.getUser(id);
+        console.log(id)
+        return new User(user, id)
+    }
+
+    static getUser(id){
         const dataPath = path.join(__dirname, '..', 'Data', "users.json")
         const users = JSON.parse(fs.readFileSync(dataPath, {encoding: 'utf8'}))
+        return users.find((object) => object.id == id)
+    }
+
+    getAllUser(){
+        const dataPath = path.join(__dirname, '..', 'Data', "users.json")
+        const users = JSON.parse(fs.readFileSync(dataPath, {encoding: 'utf8'}))
+        return users
+    }
+
+
+    addUser(){
+        let users = this.getAllUser();
         users.push(this)
-        fs.writeFileSync(dataPath, JSON.stringify(users, null, 2))
+        this.updateUsers(users)
     }
 
     deleteUser(){
-        console.log(this)
+        let users = this.getAllUser();
+        users = users.filter((element)=>{
+            if(element.id != this.id){
+                return element
+            }
+
+        })
+
+        this.updateUsers(users)
+
+    }
+
+    updateUsers(data){
+        const dataPath = path.join(__dirname, '..', 'Data', "users.json")
+        fs.writeFileSync(dataPath, JSON.stringify(data, null, 2))
+
     }
 }
 

@@ -60,7 +60,7 @@ const server = http.createServer(async(req, res) => {
                     return res.end("Merci de saisir une date d'anniversaire")
 
                 }
-                user.updateUser();
+                user.addUser();
                 res.writeHead(301, {
                     "Location": "/"
                 })
@@ -83,14 +83,28 @@ const server = http.createServer(async(req, res) => {
     
     if (req.url === '/users') {
 
-        const all = fs.readFileSync(path.join(dataPath, "all.json"), {encoding: "utf8"})
-        const {users} = JSON.parse(all)
+        const all = fs.readFileSync(path.join(dataPath, "users.json"), {encoding: "utf8"})
+        const users = JSON.parse(all)
         
         const html = renderPugTemplate(pugTemplatePath, { users: users });
         res.writeHead(200, { 'Content-Type': 'text/html' });
         res.end(html);     
 
         return;
+    }
+    const splitUrl = req.url.split('/');
+   
+    if( splitUrl[1] ===  'delete') {
+        const user = User.getUserFromID(splitUrl[2])
+        user.deleteUser();
+        res.writeHead(301, {
+            "Location": "/users"
+        })
+        res.end()
+
+
+        return;
+
     }
     
     res.writeHead(404, { 'Content-Type': 'text/plain' });
